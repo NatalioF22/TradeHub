@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{%load static%}
+
+
+       
+        <div class="container-fluid">
+         
+           
+            <div class="row">
+               <!-- Sidebar with categories -->
+<div class="col-lg-2 col-md-2 col-sm-12 bg-light">
+    
+    <!-- Sidebar with categories -->
+         <!-- Sidebar with categories -->
+         <div class="col-lg-2 col-md-2 col-sm-12 bg-light">
+            <h2 class="text-center mt-2 mb-2">Categories</h2>
+            <div class="list-group text-start">
+                <!-- Add the toggle button -->
+                <button class="btn btn-primary d-block d-md-none mb-3 px-4 mx-auto " id="sidebarToggle">Show more/less</button>
+
+                <!-- List of categories -->
+                <div class="sidebar-expanded">
+                    <div class="btn btn-outline-primary d-flex justify-content-between me-2 mb-3 mb-sm-2 mt-2">
+                        <a href="{% url 'category_items' 0 %}" style="text-decoration:none;">All:</a>
+                        <span class="badge bg-dark text-white ms-1 rounded-pill">{{ items.count }}</span>
+                    </div>
+                    {% for category in categories %}
+                    <div class="btn btn-outline-primary d-flex justify-content-between me-2 mb-3 mb-sm-2 mt-2">
+                        <a href="{% url 'category_items' category.id %}" style="text-decoration:none">{{ category }}:</a>
+                        <span class="badge bg-dark text-white ms-1 rounded-pill">{{ category.items.count }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+               
+                <!-- Collapsed sidebar -->
+                <div class="sidebar-collapsed">
+                    <div class="btn btn-outline-primary d-flex justify-content-between me-2 mb-3 mb-sm-2 mt-2">
+                        <a href="{% url 'category_items' 0 %}" style="text-decoration:none;">All</a>
+                    </div>
+                    <button class="btn btn-primary d-block d-md-none mb-3 px-4 mx-auto" id="sidebarToggleCollapsed">Show Categories</button>
+                </div>
+            </div>
+        </div>
+         <!-- Main content with items -->
+                <div class="col-lg-10 col-md-10 col-sm-12">
+                    <section class="py-5">
+                       
+                        <h1 class="text-dark text-center" style="margin-top:10px">{{ category.name }}</h1><br>
+                       
+                        
+                        <div class="container px-4 px-lg-5 mt-5">
+                            <div class="row gx-4 gx-lg-5 row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 justify-content-center">
+                                
+                                {% for item in items %}
+                                <div class="col mb-5">
+                                    <div class="card h-100">
+                                        <!-- Sale badge-->
+                                        {% if item.is_on_sale %}
+                                        <div class="badge bg-dark text-white position-absolute" style="top: 0.5rem; right: 0.5rem">Sale</div>
+                                        {% endif %}
+                                        <!-- Product image-->
+                                        {%if item.image%}
+                                        <img class="card-img-top" src="{{ item.image.url }}" alt="{{ item.name }}" />
+                                        {%else%}
+                                        <img class="card-img-top" src="{% static 'images/No_image_available.svg.png'%}" alt="{{ item.name }}" />
+                                        {%endif%}
+                                        <!-- Product details-->
+                                        <div class="card-body p-4">
+                                          
+                                            <div class="text-center">
+                                                <!-- Product name-->
+                                                <h5 class="fw-bolder">{{ item.name }}</h5>
+                                                <!-- Product reviews-->
+                                                <div class="d-flex justify-content-center small text-warning mb-2">
+                                                    {% for i in "12345" %}
+                                                    {% if i|add:"-1" < item.rating %}
+                                                    <div class="bi-star-fill"></div> <!-- Filled star -->
+                                                    {% else %}
+                                                    <div class="bi-star"></div> <!-- Empty star -->
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                </div>
+                                                <!-- Product price-->
+                                                {% if item.sale %}
+                                                <span class="text-muted text-decoration-line-through">{{ item.regular_price }}</span>
+                                                {% endif %}
+                                                {{ item.price }}
+                                            </div>
+                                        </div>
+                                        <form method="POST" action="{% url 'add_to_cart' item_id=item.id %}">
+                                        <!-- Product actions-->
+                                        {% csrf_token %}
+                                        <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+                                            
+                                            <div class="text-center"><button type="submit" class="btn btn-outline-dark mt-auto">Add to Cart</button></div>
+                                        </div>
+                                    </form>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+  
+        
+        
+   
+</div>
+<script>
+    // JavaScript to handle sidebar toggle
+    document.getElementById("sidebarToggle").addEventListener("click", function() {
+        document.querySelector(".sidebar-expanded").classList.toggle("d-none");
+        document.querySelector(".sidebar-collapsed").classList.toggle("d-block");
+    });
+
+    document.getElementById("sidebarToggleCollapsed").addEventListener("click", function() {
+        document.querySelector(".sidebar-collapsed").classList.toggle("d-none");
+        document.querySelector(".sidebar-expanded").classList.toggle("d-block");
+    });
+</script>
+{% endblock %}
+
+
+

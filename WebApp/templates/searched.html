@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+       
+        <div class="container-fluid">
+            {% if searched %}
+           
+            <div class="row">
+                <!-- Sidebar with categories -->
+                <div class="col-lg-2 col-md-2 col-sm-12 bg-light">
+                    <h2 class="text-center mt-2 mb-2">Categories</h2>
+                    <div class="list-group text-start">
+                        <div class="btn btn-outline-primary d-flex justify-content-between me-2 mb-3 mb-sm-2 mt-2">
+                            <a>All:</a>
+                            <span class="badge bg-dark text-white ms-1 rounded-pill">{{ items.count }}</span>
+                        </div>
+                
+                        {% for category in categories %}
+                        <div class="btn btn-outline-primary d-flex justify-content-between me-2 mb-3 mb-sm-2 mt-2">
+                            <a>{{ category }}:</a>
+                            <span class="badge bg-dark text-white ms-1 rounded-pill">{{ category.items.count }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+        
+                <!-- Main content with items -->
+                <div class="col-lg-10 col-md-10 col-sm-12">
+                    <section class="py-5">
+                        {%if items.count == 0%}
+
+                        <h1 class='text-dark text-center' style="margin-top:10px">There are no items associated with {{searched}}</h1>
+                        {%else%}
+                        <h1 class="text-dark text-center" style="margin-top:10px">Results for: "{{ searched }}"</h1><br>
+                        {%endif%}
+                        
+                        <div class="container px-4 px-lg-5 mt-5">
+                            <div class="row gx-4 gx-lg-5 row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 justify-content-center">
+                                
+                                {% for item in items %}
+                                <div class="col mb-5">
+                                    <div class="card h-100">
+                                        <!-- Sale badge-->
+                                        {% if item.is_on_sale %}
+                                        <div class="badge bg-dark text-white position-absolute" style="top: 0.5rem; right: 0.5rem">Sale</div>
+                                        {% endif %}
+                                        <!-- Product image-->
+                                        <img class="card-img-top" src="{{ item.image.url }}" alt="{{ item.name }}" />
+                                        <!-- Product details-->
+                                        <div class="card-body p-4">
+                                          
+                                            <div class="text-center">
+                                                <!-- Product name-->
+                                                <h5 class="fw-bolder">{{ item.name }}</h5>
+                                                <!-- Product reviews-->
+                                                <div class="d-flex justify-content-center small text-warning mb-2">
+                                                    {% for i in "12345" %}
+                                                    {% if i|add:"-1" < item.rating %}
+                                                    <div class="bi-star-fill"></div> <!-- Filled star -->
+                                                    {% else %}
+                                                    <div class="bi-star"></div> <!-- Empty star -->
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                </div>
+                                                <!-- Product price-->
+                                                {% if item.sale %}
+                                                <span class="text-muted text-decoration-line-through">{{ item.regular_price }}</span>
+                                                {% endif %}
+                                                {{ item.price }}
+                                            </div>
+                                        </div>
+                                        <form method="POST" action="{% url 'add_to_cart' item_id=item.id %}">
+                                        <!-- Product actions-->
+                                        {% csrf_token %}
+                                        <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+                                            
+                                            <div class="text-center"><button type="submit" class="btn btn-outline-dark mt-auto">Add to Cart</button></div>
+                                        </div>
+                                    </form>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+  
+        
+        
+    {% else %}
+        <h1 class='text-dark' style="margin-top:150px;margin-bottom:50px">You forgot to search for a product...</h1>
+    {% endif %}
+</div>
+{% endblock %}
+
+
+

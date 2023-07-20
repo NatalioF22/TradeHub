@@ -1,0 +1,134 @@
+{%load static%}
+<style>
+  .dropdown-item-row {
+    cursor: pointer;
+}
+
+.dropdown-item-row:hover {
+    background-color: #f8f9fa;
+}
+
+</style>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container px-4 px-lg-5">
+        <a class="navbar-brand" href="{% url 'home' %}">TradeHub</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                <li class="nav-item"><a class="nav-link active" aria-current="page" href="{% url 'home' %}">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="#!">About</a></li>
+                <li class="nav-item dropdown">
+                  {%if user.is_authenticated%}
+                  <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Shop</a>
+                  <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                      <li><a class="dropdown-item" href="#!">All Products</a></li>
+                      <li><hr class="dropdown-divider" /></li>
+                      <li><a class="dropdown-item" href="#!">Popular Items</a></li>
+                      <li><a class="dropdown-item" href="#!">New Arrivals</a></li>
+                  </ul>
+                  <li class="nav-item"><a class="nav-link" href="{% url 'logout_user'%}">Logout</a></li>
+                  {%else%}
+                    
+                </li>
+                <li class="nav-item"><a class="nav-link" href="#!"data-toggle="modal"data-target="#loginModal">Login</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'register'%}">Register</a></li>
+                {%endif%}
+            </ul>
+            <form class="d-flex me-2 mb-0 mb-sm-2" role="search" method = "POST" action = "{% url 'search_items' %}">
+              {% csrf_token %}
+                <input class="form-control me-2" type="search" placeholder="Search item" aria-label="Search" name="searched">
+                <button class="btn btn-outline-dark" type="submit">Search</button>
+              </form>
+              <form class="d-flex">
+                {% csrf_token %}
+                <div class="btn-group">
+                    <button class="btn btn-outline-dark mb-0 mb-sm-2" type="submit">
+                        <i class="bi-cart-fill me-1"></i>
+                        Cart
+                        <span class="badge bg-dark text-white ms-1 rounded-pill">{{ cart.count }}</span>
+                    </button>
+                    <button type="button" class="btn btn-outline-dark dropdown-toggle dropdown-toggle-split me-2 mb-0 mb-sm-2" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="visually-hidden">Toggle Dropdown</span>
+                    </button>
+                    {%if user.is_authenticated%}
+                    <li class="nav-link"><a class="btn btn-outline-secondary  me-1" href="#!">Dashboard</a></li>
+                      
+                       <li class="nav-link mb-0 mb-sm-2">
+                          <a href="{% url 'user_profile' request.user.username %}">
+                          {%if user.profile.profile_image%}
+                          <img src="{{user.profile.profile_image.url}}" width=35 height=35 class="" style="border-radius:50%" >
+                          {%else%}
+                          <img src="{% static 'images/default_profile_img.png' %}" width=35 height=35 class="" style="border-radius:50%" alt="profile image">
+                          {%endif%}
+                          </a>
+                       </li>
+                    
+                    {%endif%}
+                    <ul class="dropdown-menu">
+                        {% for cart_item in cart %}
+                        <li>
+                            <div class="d-flex justify-content-between align-items-center dropdown-item-row">
+                                <a class="dropdown-item" href="#">{{ cart_item.item.name }}</a>
+                                <span class="badge text-dark">${{ cart_item.item.price }}</span>
+                            </div>
+                        </li>
+                        {% endfor %}
+                        <li>
+                          <div class="d-flex justify-content-between align-items-center dropdown-item-row">
+                              <a class="dropdown-item" href="#">Subtotal: </a>
+                              <span class="badge text-dark">${{ total_price }}</span>
+                          </div>
+                      </li>
+                        {% if not cart %}
+                        <li>
+                            <a class="dropdown-item" href="#">Your cart is empty.</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </form>
+            
+            
+           
+            
+<!-- Example split danger button -->
+
+           
+</nav> 
+
+<!-- Login Modal -->
+<div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="loginModalLabel">Log In</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Login form -->
+        <form method="POST" action="{% url 'login_user' %}">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" class="form-control" placeholder="Enter your username" name="username">
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" class="form-control" placeholder="Enter your password" name="password">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Log In</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!--Register Modal-->
+
+  
