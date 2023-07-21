@@ -1,0 +1,109 @@
+
+{% extends 'base.html'%}
+{%block content%}
+{%load static%}
+<style>
+    .review-card {
+      border: 1px solid #ccc;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+  </style>
+<title>{%block title%}Item Details{%endblock%}</title>
+<div class="row gx-4 gx-lg-5 row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 justify-content-center mt-5">
+<div class="col mb-5">
+    <div class="card h-100">
+        <!-- Sale badge-->
+        {% if item.is_on_sale %}
+        <div class="badge bg-dark text-white position-absolute" style="top: 0.5rem; right: 0.5rem">Sale</div>
+        {% endif %}
+        <!-- Product image-->
+        {%if item.image%}
+        <img class="card-img-top" src="{{ item.image.url }}" alt="{{ item.name }}" />
+        {%else%}
+        <img class="card-img-top" src="{% static 'images/No_image_available.svg.png'%}" alt="{{ item.name }}" />
+        {%endif%}
+        <!-- Product details-->
+        <div class="card-body p-4">
+          
+            <div class="text-center">
+                <!-- Product name-->
+                <h5 class="fw-bolder">{{ item.name }}</h5>
+                <!-- Product reviews-->
+                <div class="d-flex justify-content-center small text-warning mb-2">
+                    {% for i in "12345" %}
+                    {% if i|add:"-1" < item.average_rating %}
+                    <div class="bi-star-fill"></div> <!-- Filled star -->
+                    {% else %}
+                    <div class="bi-star"></div> <!-- Empty star -->
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                <!-- Product price-->
+                {% if item.sale %}
+                <span class="text-muted text-decoration-line-through">{{ item.regular_price }}</span>
+                {% endif %}
+                <strong>${{ item.price }}</strong><br>
+              
+            </div>
+        </div>
+        <form method="POST" action="{% url 'add_to_cart' item_id=item.id %}">
+        <!-- Product actions-->
+        {% csrf_token %}
+        <div class="card-footer p-4 pt-0 border-top-0 bg-transparent text-center">
+          
+            <div class="text-center btn-group">
+                {%if request.user == item.created_by%}
+                <a href="{% url 'edit_item' item.id %}" class="btn btn-outline-info mt-auto me-2 rounded-2 btn-sm">Edit Item</a>
+                {%else%}
+                <a href="{% url 'rate_review_item' item.id %}" class="btn btn-outline-info mt-auto me-2 rounded-2 btn-sm">Write Review</a>
+                
+                {%endif%}
+                <button type="submit" class="btn btn-outline-dark mt-auto rounded-2 btn-sm">Add to Cart</button>
+                {%if request.user == item.created_by%}
+                <a href="{% url 'delete_item' item.id %}" class="btn btn-outline-danger mt-auto ms-2 me-2 rounded-2 btn-sm">Delete Item</a>
+                {%endif%}
+            </div>
+        </div>
+    </form>
+    </div>
+</div>
+<div class="col mb-5 card">
+    <div class="card-header lead text-muted">
+    Item description
+    </div>
+    <div class="card-body">
+        {{item.description}}
+    </div>
+</div>
+
+</div>
+<div class="container">
+<div class="row-cols-12">
+   
+    {%if item.item_reviews %}
+    <div class="col-lg-12">
+    <h4>Reviews:</h4>
+        {%for review in item_reviews %}
+            <div class="review-card rounded-2">
+                <div class="card-header"><h4>By: {{ review.by_user }}</h4></div>
+                
+                <p>Date Added:  {{ review.created_at }}</p>
+                <hr>
+                <div class="card-body"><p>{{ review.user_reviews }}</p></div>
+                
+            </div>
+
+        {%endfor%}
+    </div>
+    {%else%}
+    <div class="col-lg-12">  
+    <p>There are no reviews for this Item in the moment.</p>
+</div>
+    {%endif%}
+</div>
+</div>
+
+
+
+{%endblock%}

@@ -1,5 +1,7 @@
 {% extends 'base.html'%}
 {%block content%}
+{%if user.is_authenticated%}
+{%if profile%}
 <div class="col-md-6 offset-md-3">
    <h1>Update User</h1>
    <br>
@@ -9,6 +11,8 @@
     <input type="submit" value="Save Changes" class="btn btn-outline-success mb-5">
 </form>
 </div>
+{%endif%}
+{%endif%}
 {%endblock%}
 
 

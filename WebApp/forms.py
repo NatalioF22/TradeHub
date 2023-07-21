@@ -1,5 +1,5 @@
 from django import forms 
-from. models import  Profile
+from. models import  Profile, Item,ItemReview
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
@@ -61,3 +61,35 @@ class SignUpForm(UserCreationForm):
         if User.objects.exclude(pk=current_user.pk).filter(username=username).exists():
             raise forms.ValidationError("A user with this username already exists.")
         return username
+
+
+class AddItemForm(forms.ModelForm):
+    class Meta:
+        model = Item
+        fields = ['category', 'name', 'description', 'price', 'quantity', 'image', 'is_on_sale',]
+    def __init__(self, *args, **kwargs):
+        super(AddItemForm, self).__init__(*args, **kwargs)
+        self.fields['category'].widget.attrs.update({'class': 'form-control'})  
+        self.fields['name'].widget.attrs.update({'class': 'form-control'})  
+        self.fields['description'].widget.attrs.update({'class': 'form-control-file'})  
+        self.fields['price'].widget.attrs.update({'class': 'form-control', 'rows': 4})  
+        self.fields['quantity'].widget.attrs.update({'class': 'form-control'})  
+        self.fields['image'].widget.attrs.update({'class': 'form-control'})  
+       
+       
+   
+   
+
+class RateReviewForm(forms.Form):
+    rating = forms.ChoiceField(choices=[(i, i) for i in range(1, 6)], widget=forms.RadioSelect)
+    review = forms.CharField(widget=forms.Textarea(attrs={'rows': 4}))
+
+    def save(self, user, item):
+        rating = self.cleaned_data['rating']
+        review_text = self.cleaned_data['review']
+        ItemReview.objects.create(item=item, user=user, rating=rating, review=review_text)
+        
+    def __init__(self, *args, **kwargs):
+        super(RateReviewForm, self).__init__(*args, **kwargs)
+        self.fields['rating'].widget.attrs.update({'type': 'checkbox'})  
+        self.fields['review'].widget.attrs.update({'class': 'form-control'})  

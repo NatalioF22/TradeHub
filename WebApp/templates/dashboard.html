@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid mt-4 bg-dark text-light">
+  <div class="row">
+    <!-- Left Side - Navbar -->
+    <div class="col-md-2">
+      <nav class="navbar navbar-expand-md bg-btn-outline-secondary navbar-dark">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar2">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="collapsibleNavbar2">
+          <ul class="list-group">
+            <li class="list-group-item">Account Settings</li>
+            <li class="list-group-item">Listing Management</li>
+            <li class="list-group-item">Notification</li>
+            <li class="list-group-item">FAQs</li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+
+    <!-- Middle Side - Dashboard -->
+    <div class="col-md-7">
+      <h2>Dashboard</h2>
+
+
+      <div class="card mb-2">
+        <div class="card-header">Recent Order</div>
+        <div class="card-body">
+          <p>Order details go here...</p>
+        </div>
+      </div>
+      <!-- List of user's items -->
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between">
+            <div>Your Items</div>
+            <div>
+                <!-- Add item link or button here -->
+                <a href="{% url 'add_item'%}" class="btn btn-primary">Add Item</a>
+            </div>
+        </div>
+        <div class="container-fluid px-4 px-lg-5 mt-5">
+            <div class="row gx-4 gx-lg-5 row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 justify-content-center">
+                <!-- Loop through and display items -->
+                {% for item in items_page %}
+    
+                <!-- Item card -->
+                <div class="col mb-5">
+                    <div class="card h-100">
+                        <!-- Sale badge -->
+                        {% if item.is_on_sale %}
+                        <div class="badge bg-dark text-white position-absolute" style="top: 0.5rem; right: 0.5rem">Sale</div>
+                        {% endif %}
+                        <!-- Product image -->
+                        {% if item.image %}
+                        <img class="card-img-top" src="{{ item.image.url }}" alt="{{ item.name }}" />
+                        {% else %}
+                        <img class="card-img-top" src="{% static 'images/No_image_available.svg.png' %}" alt="{{ item.name }}" />
+                        {% endif %}
+                        <!-- Product details -->
+                        <div class="card-body p-4">
+                            <div class="text-center">
+                                <!-- Product name -->
+                                <h5 class="fw-bolder">{{ item.name }}</h5>
+                                <!-- Product reviews -->
+                                <div class="d-flex justify-content-center small text-warning mb-2">
+                                    {% for i in "12345" %}
+                                    
+                                    {% if i|add:"-1" < item.average_rating %}
+                                    <div class="bi-star-fill"></div> <!-- Filled star -->
+                                    {% else %}
+                                    <div class="bi-star"></div> <!-- Empty star -->
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <!-- Product price -->
+                                {% if item.sale %}
+                                <span class="text-muted text-decoration-line-through">{{ item.regular_price }}</span>
+                                {% endif %}
+                                {{ item.price }}
+                            </div>
+                        </div>
+                        <form method="POST" action="{% url 'add_to_cart' item_id=item.id %}">
+                            <!-- Product actions -->
+                            {% csrf_token %}
+                          
+                                <div class=" card-footer text-center btn-group p-4 pt-0 border-top-0 bg-transparent">
+                                    <a href="{% url 'item_details' item.id %}" class="btn btn-outline-info mt-auto me-2 rounded-2 btn-sm">View Details</a>
+                                    <button type="submit" class="btn btn-outline-dark mt-auto rounded-2 btn-sm">Add to Cart</button>
+                                </div>
+                            
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pagination links -->
+    <div class="pagination justify-content-center">
+        <span class="step-links">
+            {% if items_page.has_previous %}
+                <a href="?page=1"class="btn btn-outline-info me-1 ms-1">&laquo; First</a>
+                <a href="?page={{ items_page.previous_page_number }}" class="btn btn-outline-info me-1 ms-1">Previous</a>
+            {% endif %}
+    
+            <span class="current">
+                Page {{ items_page.number }} of {{ items_page.paginator.num_pages }}.
+            </span>
+    
+            {% if items_page.has_next %}
+                <a href="?page={{ items_page.next_page_number }}"class="btn btn-outline-info me-1 ms-1">Next</a>
+                <a href="?page={{ items_page.paginator.num_pages }}"class="btn btn-outline-info me-1 ms-1">Last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+     
+      <!-- Card for recent order -->
+      
+    </div>
+
+    <!-- Right Side - Cart -->
+    <div class="col-md-3">
+      <h5>Your Cart</h5>
+      <ul class="list-group">
+        {% if not cart %}
+        <a class="dropdown-item list-group-item" href="#">Your cart is empty.</a>
+        {% else %}
+        {% for cart_item in cart %}
+        <li class="list-group-item">
+          <div class="d-flex justify-content-between align-items-center dropdown-item-row">
+            <a class="dropdown-item" href="#">{{ cart_item.item.name }}</a>
+            <span class="badge text-dark">${{ cart_item.item.price }}</span>
+          </div>
+        </li>
+        {% endfor %}
+        {% endif %}
+        <!-- Add more cart items here -->
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<!-- Add the Bootstrap JS link if needed -->
+{% endblock %}

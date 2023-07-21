@@ -4,6 +4,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.db.models import Avg
 
 from django.db import models
 
@@ -18,10 +19,9 @@ class Category(models.Model):
     
 class Item(models.Model):
     category = models.ForeignKey(Category, related_name='items', on_delete=models.CASCADE)
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=30)
     description = models.TextField(blank=True, null=True)
     price = models.FloatField()
-    rating = models.IntegerField(choices=[(i, i) for i in range(1,6)], default=1)
     quantity = models.IntegerField(default=1)
     image = models.ImageField(upload_to='item_images', blank=True, null=True)
     is_popupar = models.BooleanField(default=False)
@@ -29,10 +29,31 @@ class Item(models.Model):
     is_sold = models.BooleanField(default=False)
     created_by = models.ForeignKey(User, related_name='items', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+   
     def __str__(self):
         return self.name
 
+    def average_rating(self):
+        # Calculate the average rating for this item
+        return self.reviews.aggregate(Avg('rating'))['rating__avg']
+
+    def user_review_details(self):
+        # Get all reviews for this item, along with the related user
+        return ItemReview.objects.filter(item=self).select_related('user')
+
+    def by_user(self):
+        # Return a string representation of the user who created the item
+        if self.created_by.first_name and self.created_by.last_name:
+            return f"{self.created_by.first_name} {self.created_by.last_name}"
+        else:
+            return self.created_by.username
+
+    def user_reviews(self):
+        # Get all reviews for this item as a string
+        reviews = self.reviews.all()
+        
+        return [f" {review.review}" for review in reviews]
+    
 class Profile(models.Model):
     STATE_CHOICES = (
     ('AL', 'Alabama'),
@@ -126,8 +147,6 @@ def create_profile(sender, instance, created, **kwargs):
 
     
 
-
-
 def delete_user(user_id):
     try:
         user = User.objects.get(id=user_id)
@@ -151,3 +170,28 @@ class Cart(models.Model):
     item = models.ForeignKey(Item,related_name='items', on_delete=models.CASCADE)
     def __str__(self):
         return F"{self.item.name}" if self.item else "Cart Empty"
+
+
+class ItemReview(models.Model):
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.IntegerField(choices=[(i, i) for i in range(1, 6)])
+    review = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)  # Automatically store the creation date and time
+   
+    class Meta:
+        unique_together = ('item', 'user')
+
+    def __str__(self):
+        return f"Review for {self.item.name} by {self.user.username} {self.review}"
+   
+    def by_user(self):
+        if self.user.first_name and self.user.last_name:
+            return f" {self.user.first_name} {self.user.last_name}"
+        else:
+            return f" {self.user.username}"
+           
+    def user_reviews(self):
+        return f" {self.review}"
+    
+    
